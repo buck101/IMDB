@@ -7,6 +7,8 @@ import re
 from sgmllib import SGMLParser
 import os
 import MySQLdb
+from imdb import IMDb
+
 
 enable_proxy = False
 enable_cookie = False
@@ -28,7 +30,7 @@ class Xun_Lei_Hao_Html_Parser(SGMLParser):
         self.movies = {} 
         self.id = ''
         self.name = ''
-        self.re_movie = re.compile(r'\w+\/(\w+\.html)')  
+        self.re_movie = re.compile(r'\w+\/(\w+\.html)')
 
     def start_ul(self, attrs):
         for attr in attrs:
@@ -105,6 +107,10 @@ class Xun_Lei_Hao_Spider:
 
 
 
+
+
+
+
 if enable_debug:
     httpHandler = urllib2.HTTPHandler(debuglevel = 1)
     httpsHandler = urllib2.HTTPSHandler(debuglevel = 1)
@@ -145,8 +151,8 @@ try:
     #print html
     
     web_spider = Xun_Lei_Hao_Spider("http://xunleihao.com/jingdiandianying/", "xunleihao/")
-    web_spider.page_dl_list(1, 163)
-    web_spider.page_dl_movies()
+    #web_spider.page_dl_list(1, 163)
+    #web_spider.page_dl_movies()
 
 
 
@@ -161,6 +167,17 @@ except urllib2.HTTPError, e:
     	print e.reason
     elif hasattr(e, 'code'):
     	print e.code
+
+
+
+
+
+ia = IMDb()
+the_matrix = ia.get_movie('0133093')
+print the_matrix['director']
+
+#for person in ia.search_person('Mel Gibson'):
+#    print person.personID, person['name']
 
 ##############writing to DB
 #conn = MySQLdb.connect(host = 'localhost', user = 'root', passwd = '')
