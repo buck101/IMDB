@@ -7,7 +7,8 @@ import re
 from sgmllib import SGMLParser
 import os
 import MySQLdb
-from imdb import IMDb
+import imdb
+import sys
 
 
 enable_proxy = False
@@ -169,15 +170,11 @@ except urllib2.HTTPError, e:
     	print e.code
 
 
-
-
-
-ia = IMDb()
-the_matrix = ia.get_movie('0133093')
-print the_matrix['director']
-
-#for person in ia.search_person('Mel Gibson'):
-#    print person.personID, person['name']
+#ia = imdb.IMDb('sql', 'mysql://root:@localhost/imdb')
+ia = imdb.IMDb('http')
+movie = 'The Founding of a Republic' 
+results = ia.search_movie(movie)
+print results
 
 ##############writing to DB
 #conn = MySQLdb.connect(host = 'localhost', user = 'root', passwd = '')
@@ -185,7 +182,7 @@ print the_matrix['director']
 #cursor.execute("set names utf8")
 #
 #try:
-#    cursor.execute("drop table if exists %s.t_file_info_%d")
+#    cursor.execute("create database movies")
 #
 #except MySQLdb.Error, e:
 #    print 'MySQL Error: %d %s' % (e.args[0], e.args[1])
@@ -194,3 +191,4 @@ print the_matrix['director']
 #else:
 #    cursor.close()
 #    conn.close()
+
