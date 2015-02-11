@@ -1,4 +1,4 @@
-
+# -*- coding: utf-8 -*- 
 import urllib2
 import cookielib
 import string
@@ -9,6 +9,7 @@ import os
 import MySQLdb
 import imdb
 import sys
+import time
 
 
 enable_proxy = False
@@ -22,16 +23,61 @@ headers = {
     'Referer':my_url
 }
 
+class movie:
+    def __init__(self):
+        self.imdb_id = ''
+        self.cn_name = '' 
+        self.en_name = '' 
+        self.country = '' 
+        self.year = 0 
+        self.category = '' 
+        self.imdb_score = 0 
+        self.imdb_vote = 0 
+        self.db_score = 0 
+        self.db_vote = 0 
+        self.status = 0 
+        self.comment = '' 
+        ##############
+        self.show_name = ''
+
 class Xun_Lei_Hao_Html_Parser(SGMLParser):
 
     def __init__(self):
         SGMLParser.__init__(self)
         self.is_ul = False
         self.is_movie = False
+        self.is_article_content = False
+
         self.movies = {} 
         self.id = ''
-        self.name = ''
+        self.movie = movie()
+        self.article_contents = []
+
         self.re_movie = re.compile(r'\w+\/(\w+\.html)')
+
+        #self.re_cn_name = re.compile(ur'◎译　　名　(.*)')
+        #【中文名称】：
+        #self.re_cn_name = re.compile(ur'\u25ce\u8bd1\u3000\u3000\u540d\u3000(.*?)\u0020\u25ce')
+        #self.re_cn_name = re.compile(ur'\u3010\u4e2d\u6587\u540d\u79f0\u3011\uff1a(.*?)\u0020\u0020\u3010')
+
+        #s1 = ur'\u25ce\u8bd1\u3000\u3000\u540d\u3000(.*?)\u0020\u25ce'
+        #s2 = ur'\u3010\u4e2d\u6587\u540d\u79f0\u3011\uff1a(.*?)\u0020\u0020\u3010')
+        #self.re_cn_name = re.compile(ur'%s|%s' % (ur'\u25ce\u8bd1\u3000\u3000\u540d\u3000(.*?)\u0020\u25ce',  ur'\u3010\u4e2d\u6587\u540d\u79f0\u3011\uff1a(.*?)\u0020\u0020\u3010'))
+
+        RE = ur'\u25ce\u8bd1\u3000\u3000\u540d\u3000(.*?)\u0020\u25ce'
+
+
+        #self.re_en_name = re.compile(ur'◎片　　名　(.*)')
+        self.re_en_name = re.compile(ur'\u25ce\u7247\u3000\u3000\u540d\u3000(.*?)\u0020\u25ce')
+
+        #self.re_year = re.compile(ur'◎年　　代　(\d+)')
+        self.re_year = re.compile(ur'\u25ce\u5e74\u3000\u3000\u4ee3\u3000(.*?)\u0020\u25ce')
+
+        #self.re_category = re.compile(ur'◎类　　别　(.*)')
+        self.re_category = re.compile(ur'\u25ce\u7c7b\u3000\u3000\u522b\u3000(.*?)\u0020\u25ce')
+
+        #self.re_country = re.compile(ur'◎国　　家　(.*)')
+        self.re_country = re.compile(ur'\u25ce\u56fd\u3000\u3000\u5bb6\u3000(.*?)\u0020\u25ce')
 
     def start_ul(self, attrs):
         for attr in attrs:
@@ -41,27 +87,110 @@ class Xun_Lei_Hao_Html_Parser(SGMLParser):
     def start_a(self, attrs):
         if self.is_ul:
     	    href = [v for k, v in attrs if k == 'href']
-            match = self.re_movie.search(str(href))
-    	    if match:
+            search = self.re_movie.search(str(href))
+    	    if search:
                 self.is_movie = True
-                print ''.join(match.groups())
-                self.id = ''.join(match.groups()) 
-                #self.movies.extend(match.groups())
+                self.id = ''.join(search.groups()) 
+
+    def start_div(self, attrs):
+        for attr in attrs:
+            if attr[1] == 'articlecontent':
+                self.is_article_content = True
 
     def handle_data(self, text):
         if self.is_ul and self.is_movie:
-            print unicode(text,'GBK').encode('UTF-8')
-            self.name = unicode(text,'GBK').encode('UTF-8')
-            #self.movies_name.extend(unicode(text,'GBK').encode('UTF-8'))
+            self.movie.show_name = text.decode('GBK').encode('UTF-8')
+
+        if self.is_article_content:
+            self.article_contents.append(text.decode('GBK'))
+
 
     def end_a(self):
         if self.is_movie:
             self.is_movie = False
-            self.movies[self.id] = self.name
+            self.movies[self.id] = self.movie
 
     def end_ul(self):
         if self.is_ul:
             self.is_ul = False
+
+    def end_div(self):
+        if self.is_article_content:
+            self.is_article_content = False
+            text = ' '.join(self.article_contents)
+
+            all_found = True;
+
+            search = self.re_year.search(text)
+    	    if search:
+                self.movie.year = int(''.join(search.groups()))
+                print "year ", self.movie.year
+            else:
+                print "year not found"
+                all_found = False
+
+            search = self.re_en_name.search(text)
+    	    if search:
+                self.movie.en_name = ''.join(search.groups())
+                print "ename ", self.movie.en_name
+            else:
+                print "ename not found"
+                all_found = False
+
+            search = self.re_cn_name.search(text)
+    	    if search:
+                self.movie.cn_name = ''.join(search.groups())
+                print "cname ", self.movie.cn_name
+            else:
+                print "cname not found"
+                all_found = False
+
+            search = self.re_category.search(text)
+    	    if search:
+                self.movie.category = ''.join(search.groups())
+                print "category ", self.movie.category
+            else:
+                print "category not found"
+                all_found = False
+
+            search = self.re_country.search(text)
+    	    if search:
+                self.movie.country = ''.join(search.groups())
+                print "country ", self.movie.country
+            else:
+                print "country not found"
+                all_found = False
+
+            if all_found == False:
+                print text
+                print repr(text)
+
+            self.article_contents = []
+            time.sleep(1)
+
+
+
+            #if self.movie.en_name == '':
+            #    print "en_name not found"
+            #    time.sleep(1)
+
+            #if self.movie.cn_name == '':
+            #    print "cn_name not found"
+            #    time.sleep(1)
+
+            #if self.movie.country == '':
+            #    print "country not found"
+            #    time.sleep(1)
+
+            #if self.movie.category == '':
+            #    print "category not found"
+            #    time.sleep(1)
+
+            #if self.movie.year == 0:
+            #    print "year not found"
+            #    time.sleep(1)
+
+            #self.movie.__init__()
 
 class Xun_Lei_Hao_Spider:
 
@@ -76,23 +205,23 @@ class Xun_Lei_Hao_Spider:
     	    local_file_name = "list_5_" + string.zfill(i, 3) + ".html"
             if os.path.isfile(self.dir_name + local_file_name):
     	        f = open(self.dir_name + local_file_name, 'r+')
-    	        print "R[" + self.url + remote_file_name + "]"
+    	        #print "R[" + self.url + remote_file_name + "]"
     	        page_content = ''.join(f.readlines())
     	        f.close()
             else:
     	        page_content = urllib2.urlopen(self.url + remote_file_name).read()
     	        f = open(self.dir_name + local_file_name, 'w+')
-    	        print "W[" + self.url + remote_file_name + "]"
+    	        #print "W[" + self.url + remote_file_name + "]"
     	        f.write(page_content)
     	        f.close()
             self.html_parser.feed(page_content)
 
     def page_dl_movies(self):
         print "Total:", len(self.html_parser.movies)
+        time.sleep(2) 
     	for (k, v) in self.html_parser.movies.items():
     	    remote_file_name = k
             local_file_name = k
-            #local_file_name = v + ".html"
             if os.path.isfile(self.dir_name + "/movies/" + local_file_name):
     	        f = open(self.dir_name + "/movies/" + local_file_name, 'r+')
     	        print "R>>>>" + self.url + remote_file_name
@@ -145,15 +274,15 @@ try:
     
     #if enable_cookie:
     #   for item in cookie:
-    #   	print 'Name = ' + item.name
-    #   	print 'Value = ' + item.value
+    #       print 'Name = ' + item.name
+    #       print 'Value = ' + item.value
     
     #html = res.read()
     #print html
     
     web_spider = Xun_Lei_Hao_Spider("http://xunleihao.com/jingdiandianying/", "xunleihao/")
-    #web_spider.page_dl_list(1, 163)
-    #web_spider.page_dl_movies()
+    web_spider.page_dl_list(1, 163)
+    web_spider.page_dl_movies()
 
 
 
@@ -171,10 +300,10 @@ except urllib2.HTTPError, e:
 
 
 #ia = imdb.IMDb('sql', 'mysql://root:@localhost/imdb')
-ia = imdb.IMDb('http')
-movie = 'The Founding of a Republic' 
-results = ia.search_movie(movie)
-print results
+#ia = imdb.IMDb('http')
+#movie = 'sex' 
+#results = ia.search_movie(movie)
+#print results
 
 ##############writing to DB
 #conn = MySQLdb.connect(host = 'localhost', user = 'root', passwd = '')
