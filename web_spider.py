@@ -48,25 +48,78 @@ class Xun_Lei_Hao_Html_Parser(SGMLParser):
         self.is_movie = False
         self.is_article_content = False
 
-        self.movies = {} 
+        self.found_count = 0
+        self.not_found_count = 0
+
+        self.movies = {}
         self.id = ''
         self.movie = movie()
         self.article_contents = []
 
         self.re_movie = re.compile(r'\w+\/(\w+\.html)')
 
-        #self.re_cn_name = re.compile(ur'◎译　　名　(.*)')
-        #【中文名称】：
+        self.re_cn_name = []
 
-        #self.re_cn_name_1 = re.compile(ur'\u25ce\u8bd1\u3000\u3000\u540d\u3000(.*?)\u0020\u25ce')
-        self.re_cn_name_1 = re.compile(ur'\u540f')
+        #◎译　　名　剑花烟雨江南 ◎ (\u25ce\u8bd1\u3000\u3000\u540d\u3000\u5251\u82b1\u70df\u96e8\u6c5f\u5357 )
+        self.re_cn_name.append(re.compile(ur'\u25ce\u8bd1\u3000+\u540d(.*?)\u0020+'))
+        #◎译　　名  拨云见日 ◎ (\u25ce\u8bd1\u3000\u3000\u540d  \u62e8\u4e91\u89c1\u65e5 )
+        self.re_cn_name.append(re.compile(ur'\u25ce\u8bd1\u3000+\u540d\u0020+(.+?)\u0020+'))
+        #【译　　名】　小鬼大间谍/非常小特务/神童特工/特工神童  【 ()
+        self.re_cn_name.append(re.compile(ur'\u3010\u8bd1\u3000+\u540d\u3011(.+?)\u0020+'))
+        #【译　　名】衰仔失乐园/你他妈的也是/你妈妈也一样/你的妈妈也是/你的妈妈也一样/我操了你妈 
+        self.re_cn_name.append(re.compile(ur'\u3010\u8bd1\u3000+\u540d\u3011(.+?)\u0020+'))
+        #译　　名：爱再来一次  
+        self.re_cn_name.append(re.compile(ur'\u8bd1\u3000+\u540d\uff1a(.+?)\u0020+'))
 
-		#◎中文片名　风雨双流星  (\u25ce\u4e2d\u6587\u7247\u540d\u3000\u98ce\u96e8\u53cc\u6d41\u661f  \u25ce)
-        self.re_cn_name_2 = re.compile(ur'\u25ce\u4e2d\u6587\u7247\u540d\u3000+(.+?)\u0020+\u25ce')
-        #self.re_cn_name_2 = re.compile(ur'\u302d')
 
-        #self.re_cn_name_3 = re.compile(ur'\u25ce\u4e2d\u6587\u7247\u540d\u3000(.*?)\u0020\u0020\u25ce')
-        self.re_cn_name_3 = re.compile(ur'\u5643')
+	#◎中文片名　风雨双流星  (\u25ce\u4e2d\u6587\u7247\u540d\u3000\u98ce\u96e8\u53cc\u6d41\u661f  )
+        self.re_cn_name.append(re.compile(ur'\u25ce\u4e2d\u6587\u7247\u540d(.+?)\u0020+'))
+        #【中文　名】街头日记/自由作家  【
+        self.re_cn_name.append(re.compile(ur'\u3010\u4e2d.*\u6587.*\u540d\u3011(.+?)\u0020+'))
+        #◎中 文 名　比佛利山警探2  ◎
+        self.re_cn_name.append(re.compile(ur'\u25ce\u4e2d\u0020+\u6587\u0020+\u540d(.+?)\u0020+'))
+        #◎中文　名　嫁个有钱人  ◎
+        self.re_cn_name.append(re.compile(ur'\u25ce\u4e2d\u6587\u3000+\u540d(.+?)\u0020+'))
+        #【中文译名】女孩   【
+        self.re_cn_name.append(re.compile(ur'\u3010\u4e2d\u6587\u8bd1\u540d\u3011(.+?)\u0020+'))
+        #【中文名称】终结者/魔鬼终结者/未来战士   【
+        self.re_cn_name.append(re.compile(ur'\u3010\u4e2d\u6587\u540d\u79f0\u3011(.+?)\u0020+'))
+        #【中文片名】父辈的旗帜/硫磺岛浴血战/硫磺岛的英雄们/战火旗迹  
+        self.re_cn_name.append(re.compile(ur'\u3010\u4e2d\u6587\u7247\u540d\u3011(.+?)\u0020+'))
+        #中 文 名: 败家仔  
+        self.re_cn_name.append(re.compile(ur'\u4e2d.*\u6587.*\u540d:(.+?)\u0020'))
+        #◎中 文 名: 
+        self.re_cn_name.append(re.compile(ur'\u25ce\u4e2d.*\u6587.*\u540d.(.+?)\u0020+'))
+        #中文名称：光荣岁月 
+        self.re_cn_name.append(re.compile(ur'\u4e2d\u6587\u540d\u79f0.(.+?)\u0020+'))
+        #◎中文译名 彗星美人  
+        self.re_cn_name.append(re.compile(ur'\u25ce\u4e2d\u6587\u8bd1\u540d(.+?)\u0020+'))
+
+
+
+        #片名：爱的逃兵  　
+        self.re_cn_name.append(re.compile(ur'\u7247\u540d.(.+?)\u0020+'))
+        #别名：挥洒烈爱/笔姬别恋   
+        self.re_cn_name.append(re.compile(ur'\u522b\u540d.(.+?)\u0020+'))
+        #◎片　　名 迷途英雄  
+        self.re_cn_name.append(re.compile(ur'\u25ce\u7247\u3000*\u540d(.+?)\u0020+'))
+        #【别　　名】蝙蝠侠：开战时刻/蝙蝠侠前传/蝙蝠侠5：侠影之谜
+        self.re_cn_name.append(re.compile(ur'\u3010\u522b.*\u540d\u3011(.+?)\u0020+'))
+        #【片 　　名】冒险王  
+        self.re_cn_name.append(re.compile(ur'\u3010\u7247.*\u540d\u3011(.+?)\u0020+'))
+
+        #【外文译名】铁道员/鉄道員  
+        self.re_cn_name.append(re.compile(ur'\u3010\u5916\u6587\u8bd1\u540d\u3011(.+?)\u0020+'))
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -102,10 +155,10 @@ class Xun_Lei_Hao_Html_Parser(SGMLParser):
 
     def handle_data(self, text):
         if self.is_ul and self.is_movie:
-            self.movie.show_name = text.decode('GBK').encode('UTF-8')
+            self.movie.show_name = text.decode('GBK', 'ignore').encode('UTF-8')
 
         if self.is_article_content:
-            self.article_contents.append(text.decode('GBK'))
+            self.article_contents.append(text.decode('GBK', 'ignore'))
 
 
     def end_a(self):
@@ -117,32 +170,28 @@ class Xun_Lei_Hao_Html_Parser(SGMLParser):
         if self.is_ul:
             self.is_ul = False
 
-	def end_div(self):
-		if self.is_article_content:
-			self.is_article_content = False
-			text = ' '.join(self.article_contents)
+    def end_div(self):
+    	if self.is_article_content:
+    	    self.is_article_content = False
+    	    text = ' '.join(self.article_contents)
 
-			all_found = True;
+    	    found = False;
 
-			search = self.re_cn_name_1.search(text)
-			if search:
-				self.movie.cn_name = ''.join(search.groups())
-				print "cname=", self.movie.cn_name
-			else:
-				search = self.re_cn_name_2.search(text)
-				if search:
-					self.movie.cn_name = ''.join(search.groups())
-					print "cname=", self.movie.cn_name
-				else:
-					search = self.re_cn_name_3.search(text)
-					if search:
-						self.movie.cn_name = ''.join(search.groups())
-						print "cname=", self.movie.cn_name
-					else:
-						print "cname not found"
-						all_found = False
-			#print repr(self.movie.cn_name)
-			time.sleep(10)
+            for p in self.re_cn_name:
+                search = p.search(text)
+    	        if search:
+    	            self.movie.cn_name = ''.join(search.groups())
+                    found = True
+                    break
+    	    if found:
+    	    	print "cname=", self.movie.cn_name.encode('UTF-8')
+                self.found_count = self.found_count + 1 
+    	    else:
+                self.not_found_count = self.not_found_count + 1
+    	    	print "cname not found"
+                #print text.encode('UTF-8')
+                #print repr(text)
+
 
             #search = self.re_year.search(text)
     	    #if search:
@@ -176,12 +225,8 @@ class Xun_Lei_Hao_Html_Parser(SGMLParser):
             #    print "country not found"
             #    all_found = False
 
-			if all_found == False:
-				print text
-				print repr(text)
-			
-			self.article_contents = []
-			time.sleep(1)
+	    self.article_contents = []
+	    #time.sleep(1)
 
 
 
@@ -296,8 +341,11 @@ try:
     #print html
     
     web_spider = Xun_Lei_Hao_Spider("http://xunleihao.com/jingdiandianying/", "xunleihao/")
-    web_spider.page_dl_list(1, 1)
+    web_spider.page_dl_list(1, 163)
     web_spider.page_dl_movies()
+
+    print web_spider.html_parser.found_count
+    print web_spider.html_parser.not_found_count
 
 
 
