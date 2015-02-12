@@ -10,7 +10,7 @@ import MySQLdb
 import imdb
 import sys
 import time
-
+import copy
 
 enable_proxy = False
 enable_cookie = False
@@ -48,9 +48,6 @@ class Xun_Lei_Hao_Html_Parser(SGMLParser):
         self.is_movie = False
         self.is_article_content = False
 
-        self.found_count = 0
-        self.not_found_count = 0
-
         self.movies = {}
         self.id = ''
         self.movie = movie()
@@ -58,82 +55,60 @@ class Xun_Lei_Hao_Html_Parser(SGMLParser):
 
         self.re_movie = re.compile(r'\w+\/(\w+\.html)')
 
-        self.re_cn_name = []
-
-        #◎译　　名　剑花烟雨江南 ◎ (\u25ce\u8bd1\u3000\u3000\u540d\u3000\u5251\u82b1\u70df\u96e8\u6c5f\u5357 )
-        self.re_cn_name.append(re.compile(ur'\u25ce\u8bd1\u3000+\u540d(.*?)\u0020+'))
-        #◎译　　名  拨云见日 ◎ (\u25ce\u8bd1\u3000\u3000\u540d  \u62e8\u4e91\u89c1\u65e5 )
-        self.re_cn_name.append(re.compile(ur'\u25ce\u8bd1\u3000+\u540d\u0020+(.+?)\u0020+'))
-        #【译　　名】　小鬼大间谍/非常小特务/神童特工/特工神童  【 ()
-        self.re_cn_name.append(re.compile(ur'\u3010\u8bd1\u3000+\u540d\u3011(.+?)\u0020+'))
-        #【译　　名】衰仔失乐园/你他妈的也是/你妈妈也一样/你的妈妈也是/你的妈妈也一样/我操了你妈 
-        self.re_cn_name.append(re.compile(ur'\u3010\u8bd1\u3000+\u540d\u3011(.+?)\u0020+'))
-        #译　　名：爱再来一次  
-        self.re_cn_name.append(re.compile(ur'\u8bd1\u3000+\u540d\uff1a(.+?)\u0020+'))
+        #self.found_count = 0
+        #self.not_found_count = 0
 
 
-	#◎中文片名　风雨双流星  (\u25ce\u4e2d\u6587\u7247\u540d\u3000\u98ce\u96e8\u53cc\u6d41\u661f  )
-        self.re_cn_name.append(re.compile(ur'\u25ce\u4e2d\u6587\u7247\u540d(.+?)\u0020+'))
-        #【中文　名】街头日记/自由作家  【
-        self.re_cn_name.append(re.compile(ur'\u3010\u4e2d.*\u6587.*\u540d\u3011(.+?)\u0020+'))
-        #◎中 文 名　比佛利山警探2  ◎
-        self.re_cn_name.append(re.compile(ur'\u25ce\u4e2d\u0020+\u6587\u0020+\u540d(.+?)\u0020+'))
-        #◎中文　名　嫁个有钱人  ◎
-        self.re_cn_name.append(re.compile(ur'\u25ce\u4e2d\u6587\u3000+\u540d(.+?)\u0020+'))
-        #【中文译名】女孩   【
-        self.re_cn_name.append(re.compile(ur'\u3010\u4e2d\u6587\u8bd1\u540d\u3011(.+?)\u0020+'))
-        #【中文名称】终结者/魔鬼终结者/未来战士   【
-        self.re_cn_name.append(re.compile(ur'\u3010\u4e2d\u6587\u540d\u79f0\u3011(.+?)\u0020+'))
-        #【中文片名】父辈的旗帜/硫磺岛浴血战/硫磺岛的英雄们/战火旗迹  
-        self.re_cn_name.append(re.compile(ur'\u3010\u4e2d\u6587\u7247\u540d\u3011(.+?)\u0020+'))
-        #中 文 名: 败家仔  
-        self.re_cn_name.append(re.compile(ur'\u4e2d.*\u6587.*\u540d:(.+?)\u0020'))
-        #◎中 文 名: 
-        self.re_cn_name.append(re.compile(ur'\u25ce\u4e2d.*\u6587.*\u540d.(.+?)\u0020+'))
-        #中文名称：光荣岁月 
-        self.re_cn_name.append(re.compile(ur'\u4e2d\u6587\u540d\u79f0.(.+?)\u0020+'))
-        #◎中文译名 彗星美人  
-        self.re_cn_name.append(re.compile(ur'\u25ce\u4e2d\u6587\u8bd1\u540d(.+?)\u0020+'))
+        #self.re_cn_name = []
+        ##【中文片名】父辈的旗帜/硫磺岛浴血战/硫磺岛的英雄们/战火旗迹  
+        #self.re_cn_name.append(re.compile(ur'\u3010\u4e2d\u6587\u7247\u540d\u3011.(.+?)\u3010'))
+
+        ##◎中文译名 彗星美人  
+        #self.re_cn_name.append(re.compile(ur'\u25ce\u4e2d\u6587\u8bd1\u540d.(.+?)\u25ce'))
+	##◎中文片名　风雨双流星  (\u25ce\u4e2d\u6587\u7247\u540d\u3000\u98ce\u96e8\u53cc\u6d41\u661f  )
+        #self.re_cn_name.append(re.compile(ur'\u25ce\u4e2d\u6587\u7247\u540d.(.+?)\u25ce'))
+        ##中文名称：光荣岁月 
+        #self.re_cn_name.append(re.compile(ur'\u4e2d\u6587\u540d\u79f0.(.+?)\u0020+'))
+
+        ##◎中 文 名: 
+        #self.re_cn_name.append(re.compile(ur'\u25ce\u4e2d.*?\u6587.*?\u540d.(.+?)\u25ce'))
+        ##中 文 名: 败家仔  
+        #self.re_cn_name.append(re.compile(ur'\u4e2d.*\u6587.*\u540d.(.+?)\u0020+'))
+
+        ##【译　　名】　小鬼大间谍/非常小特务/神童特工/特工神童  【 ()
+        #self.re_cn_name.append(re.compile(ur'\u3010\u8bd1.*?\u540d\u3011(.+?)\u3010'))
+        ##◎译　　名  拨云见日 ◎ (\u25ce\u8bd1\u3000\u3000\u540d  \u62e8\u4e91\u89c1\u65e5 )
+        #self.re_cn_name.append(re.compile(ur'\u25ce\u8bd1.*?\u540d.(.+?)\u25ce'))
+        ##译　　名：爱再来一次  
+        #self.re_cn_name.append(re.compile(ur'\u8bd1.*?\u540d.(.+?)\u0020+'))
 
 
+        ##片名：爱的逃兵  　
+        #self.re_cn_name.append(re.compile(ur'\u7247\u540d.(.+?)\u0020+'))
+        ##别名：挥洒烈爱/笔姬别恋   
+        #self.re_cn_name.append(re.compile(ur'\u522b\u540d.(.+?)\u0020+'))
+        ##◎片　　名 迷途英雄  
+        #self.re_cn_name.append(re.compile(ur'\u25ce\u7247\u3000*\u540d(.+?)\u0020+'))
+        ##【别　　名】蝙蝠侠：开战时刻/蝙蝠侠前传/蝙蝠侠5：侠影之谜
+        #self.re_cn_name.append(re.compile(ur'\u3010\u522b.*\u540d\u3011(.+?)\u0020+'))
+        ##【片 　　名】冒险王  
+        #self.re_cn_name.append(re.compile(ur'\u3010\u7247.*\u540d\u3011(.+?)\u0020+'))
 
-        #片名：爱的逃兵  　
-        self.re_cn_name.append(re.compile(ur'\u7247\u540d.(.+?)\u0020+'))
-        #别名：挥洒烈爱/笔姬别恋   
-        self.re_cn_name.append(re.compile(ur'\u522b\u540d.(.+?)\u0020+'))
-        #◎片　　名 迷途英雄  
-        self.re_cn_name.append(re.compile(ur'\u25ce\u7247\u3000*\u540d(.+?)\u0020+'))
-        #【别　　名】蝙蝠侠：开战时刻/蝙蝠侠前传/蝙蝠侠5：侠影之谜
-        self.re_cn_name.append(re.compile(ur'\u3010\u522b.*\u540d\u3011(.+?)\u0020+'))
-        #【片 　　名】冒险王  
-        self.re_cn_name.append(re.compile(ur'\u3010\u7247.*\u540d\u3011(.+?)\u0020+'))
-
-        #【外文译名】铁道员/鉄道員  
-        self.re_cn_name.append(re.compile(ur'\u3010\u5916\u6587\u8bd1\u540d\u3011(.+?)\u0020+'))
-
+        ##【外文译名】铁道员/鉄道員  
+        #self.re_cn_name.append(re.compile(ur'\u3010\u5916\u6587\u8bd1\u540d\u3011(.+?)\u0020+'))
 
 
+        ##self.re_en_name = re.compile(ur'◎片　　名　(.*)')
+        #self.re_en_name = re.compile(ur'\u25ce\u7247\u3000\u3000\u540d\u3000(.*?)\u0020\u25ce')
 
+        ##self.re_year = re.compile(ur'◎年　　代　(\d+)')
+        #self.re_year = re.compile(ur'\u25ce\u5e74\u3000\u3000\u4ee3\u3000(.*?)\u0020\u25ce')
 
+        ##self.re_category = re.compile(ur'◎类　　别　(.*)')
+        #self.re_category = re.compile(ur'\u25ce\u7c7b\u3000\u3000\u522b\u3000(.*?)\u0020\u25ce')
 
-
-
-
-
-
-
-
-        #self.re_en_name = re.compile(ur'◎片　　名　(.*)')
-        self.re_en_name = re.compile(ur'\u25ce\u7247\u3000\u3000\u540d\u3000(.*?)\u0020\u25ce')
-
-        #self.re_year = re.compile(ur'◎年　　代　(\d+)')
-        self.re_year = re.compile(ur'\u25ce\u5e74\u3000\u3000\u4ee3\u3000(.*?)\u0020\u25ce')
-
-        #self.re_category = re.compile(ur'◎类　　别　(.*)')
-        self.re_category = re.compile(ur'\u25ce\u7c7b\u3000\u3000\u522b\u3000(.*?)\u0020\u25ce')
-
-        #self.re_country = re.compile(ur'◎国　　家　(.*)')
-        self.re_country = re.compile(ur'\u25ce\u56fd\u3000\u3000\u5bb6\u3000(.*?)\u0020\u25ce')
+        ##self.re_country = re.compile(ur'◎国　　家　(.*)')
+        #self.re_country = re.compile(ur'\u25ce\u56fd\u3000\u3000\u5bb6\u3000(.*?)\u0020\u25ce')
 
     def start_ul(self, attrs):
         for attr in attrs:
@@ -155,7 +130,7 @@ class Xun_Lei_Hao_Html_Parser(SGMLParser):
 
     def handle_data(self, text):
         if self.is_ul and self.is_movie:
-            self.movie.show_name = text.decode('GBK', 'ignore').encode('UTF-8')
+            self.movie.show_name = text.decode('GBK', 'ignore')
 
         if self.is_article_content:
             self.article_contents.append(text.decode('GBK', 'ignore'))
@@ -164,7 +139,7 @@ class Xun_Lei_Hao_Html_Parser(SGMLParser):
     def end_a(self):
         if self.is_movie:
             self.is_movie = False
-            self.movies[self.id] = self.movie
+            self.movies[self.id] = copy.copy(self.movie)
 
     def end_ul(self):
         if self.is_ul:
@@ -173,24 +148,24 @@ class Xun_Lei_Hao_Html_Parser(SGMLParser):
     def end_div(self):
     	if self.is_article_content:
     	    self.is_article_content = False
-    	    text = ' '.join(self.article_contents)
+    	    text = ' '.join(self.article_contents).replace('\r\n', '')
 
-    	    found = False;
+    	    #found = False;
 
-            for p in self.re_cn_name:
-                search = p.search(text)
-    	        if search:
-    	            self.movie.cn_name = ''.join(search.groups())
-                    found = True
-                    break
-    	    if found:
-    	    	print "cname=", self.movie.cn_name.encode('UTF-8')
-                self.found_count = self.found_count + 1 
-    	    else:
-                self.not_found_count = self.not_found_count + 1
-    	    	print "cname not found"
-                #print text.encode('UTF-8')
-                #print repr(text)
+            #for p in self.re_cn_name:
+            #    search = p.search(text)
+    	    #    if search:
+    	    #        self.movie.cn_name = ''.join(search.groups())
+            #        found = True
+            #        break
+    	    #if found:
+    	    #	print "cname=", self.movie.cn_name.encode('UTF-8')
+            #    self.found_count = self.found_count + 1 
+    	    #else:
+            #    self.not_found_count = self.not_found_count + 1
+    	    #	print "cname not found"
+            #    print text.encode('UTF-8')
+            #    print repr(text)
 
 
             #search = self.re_year.search(text)
@@ -225,7 +200,7 @@ class Xun_Lei_Hao_Html_Parser(SGMLParser):
             #    print "country not found"
             #    all_found = False
 
-	    self.article_contents = []
+	    #self.article_contents = []
 	    #time.sleep(1)
 
 
@@ -344,8 +319,8 @@ try:
     web_spider.page_dl_list(1, 163)
     web_spider.page_dl_movies()
 
-    print web_spider.html_parser.found_count
-    print web_spider.html_parser.not_found_count
+    #print web_spider.html_parser.found_count
+    #print web_spider.html_parser.not_found_count
 
 
 
@@ -369,18 +344,24 @@ except urllib2.HTTPError, e:
 #print results
 
 ##############writing to DB
-#conn = MySQLdb.connect(host = 'localhost', user = 'root', passwd = '')
-#cursor = conn.cursor()
-#cursor.execute("set names utf8")
-#
-#try:
-#    cursor.execute("create database movies")
-#
-#except MySQLdb.Error, e:
-#    print 'MySQL Error: %d %s' % (e.args[0], e.args[1])
-#    conn.rollback()
-#    sys.exit()
-#else:
-#    cursor.close()
-#    conn.close()
+conn = MySQLdb.connect(host = 'localhost', user = 'root', passwd = '')
+cursor = conn.cursor()
+cursor.execute("set names utf8")
+cursor.execute("set autocommit=1")
+
+try:
+    cursor.execute("use movies")
+    cursor.execute("truncate table xlh_fileid2show_name")
+    for (k, v) in web_spider.html_parser.movies.items():
+        #print "insert into xlh_fileid2show_name values('%s','%s')"  % (k, v.show_name.encode('UTF-8'));
+        cursor.execute("insert into xlh_fileid2show_name values('%s','%s')"  % (k, v.show_name.encode('UTF-8')));
+    #conn.commit()
+
+except MySQLdb.Error, e:
+    print 'MySQL Error: %d %s' % (e.args[0], e.args[1])
+    conn.rollback()
+    sys.exit()
+else:
+    cursor.close()
+    conn.close()
 
