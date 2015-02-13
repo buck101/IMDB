@@ -126,7 +126,6 @@ class Xun_Lei_Hao_Html_Parser(SGMLParser):
             else:
                 self.movies[self.id] = copy.copy(self.movie)
 
-
     # for dl_movie
     #def start_div(self, attrs):
     #    for attr in attrs:
@@ -167,7 +166,7 @@ class Xun_Lei_Hao_Spider:
             else:
     	        page_content = urllib2.urlopen(self.url + remote_file_name).read()
                 if page_content.decode('GBK', 'ignore').find(ur'\u60a8\u8bbf\u95ee\u7684\u5730\u5740\u4e0d\u5b58\u5728') != -1:
-                    print self.self.url + remote_file_name, "not found 404"
+                    print self.url + remote_file_name, "not found 404"
                     break
     	        f = open(self.dir_name + local_file_name, 'w+')
     	        print "W[" + self.url + remote_file_name + "]"
@@ -176,7 +175,7 @@ class Xun_Lei_Hao_Spider:
             self.html_parser.feed(page_content)
             i = i + 1
 
-    def page_dl_movies(self):
+    def page_dl_movie(self):
         print "Total:", len(self.html_parser.movies)
         time.sleep(2) 
     	for (k, v) in self.html_parser.movies.items():
@@ -275,18 +274,17 @@ try:
     
     web_spider = Xun_Lei_Hao_Spider()
     web_spider.process_web('JDDY')
-    #web_spider.page_dl_list('JDDY')
-    #web_spider.page_dl_list('OMDY')
-    #web_spider.page_dl_list('RHDY')
-    #web_spider.page_dl_list('GTDY')
-    #web_spider.page_dl_list('DLDY')
-    #web_spider.page_dl_list('OMJ')
-    #web_spider.page_dl_list('RHJ')
-    #web_spider.page_dl_list('GTJ')
-    #web_spider.page_dl_list('DLJ')
-    #web_spider.page_dl_list('ZYP')
-    #web_spider.page_dl_list('DM')
-    #web_spider.page_dl_movies()
+    web_spider.process_web('OMDY')
+    web_spider.process_web('RHDY')
+    web_spider.process_web('GTDY')
+    web_spider.process_web('DLDY')
+    web_spider.process_web('OMJ')
+    web_spider.process_web('RHJ')
+    web_spider.process_web('GTJ')
+    web_spider.process_web('DLJ')
+    web_spider.process_web('ZYP')
+    web_spider.process_web('DM')
+    #web_spiderprocess_web`.page_dl_movies()
 
 
 except urllib2.URLError, e:
