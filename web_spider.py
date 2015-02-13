@@ -174,25 +174,30 @@ class Xun_Lei_Hao_Spider:
     	        f.close()
             self.html_parser.feed(page_content)
             i = i + 1
+            if self.category == "ZYP" and i >= 362:
+                break
 
     def page_dl_movie(self):
         print "Total:", len(self.html_parser.movies)
         time.sleep(2) 
+        total = len(self.html_parser.movies.items())
+        count = 1
     	for (k, v) in self.html_parser.movies.items():
     	    remote_file_name = k
             local_file_name = k
             if os.path.isfile("xunleihao/movies/" + local_file_name):
     	        f = open("xunleihao/movies/" + local_file_name, 'r+')
-    	        print "R>>>>" + self.url + remote_file_name
+    	        print "[", count, "-", total, "] R>>>>" + self.url + remote_file_name
     	        page_content = ''.join(f.readlines())
     	        f.close()
             else:
     	        page_content = urllib2.urlopen(self.url + remote_file_name).read()
     	        f = open("xunleihao/movies/" + local_file_name, 'w+')
-    	        print "D>>>>" + self.url + remote_file_name
+    	        print "[", count, "-", total, "] D>>>>" + self.url + remote_file_name
     	        f.write(page_content)
     	        f.close()
             #self.html_parser.feed(page_content)
+            count = count + 1
 
     def write_to_db(self):
         ##############writing to DB
@@ -217,6 +222,7 @@ class Xun_Lei_Hao_Spider:
             conn.close()
 
     def process_web(self, category):
+        self.category = category
     	self.dir_name = C2D[category]
     	self.index = C2I[category]
         self.url = xun_lei_hao + C2U[category]
