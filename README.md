@@ -8,3 +8,9 @@ python /usr/share/doc/python-imdb-4.5.1/examples/imdbpy2sql.py  -d ~/tmp/imdb -u
 Ubuntu:
 http://dola.xinfan.org/?p=117
 http://tr23.net/2013/11/26/using-the-imdb-dataset-for-testing-mysql-performance/
+
+
+
+rm -rf xunleihao/*
+mkdir xunleihao
+mkdir DLDY  DLJ  DM  GTDY  GTJ  JDDY  OMDY  OMJ  RHDY  RHJ  ZYP  movies

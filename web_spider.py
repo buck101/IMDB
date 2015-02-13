@@ -205,7 +205,7 @@ class Xun_Lei_Hao_Spider:
             cursor.execute("use movies")
             #cursor.execute("truncate table xunleihao")
             for (k, v) in self.html_parser.movies.items():
-                cursor.execute("insert into xunleihao values('%s','%s','%s')"  % (k, v.category, v.show_name.encode('UTF-8')));
+                cursor.execute("replace into xunleihao values('%s','%s','%s')"  % (k, v.category, v.show_name.encode('UTF-8')));
                 conn.commit()
         
         except MySQLdb.Error, e:
