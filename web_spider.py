@@ -203,7 +203,7 @@ class Xun_Lei_Hao_Spider:
         
         try:
             cursor.execute("use movies")
-            cursor.execute("truncate table xunleihao")
+            #cursor.execute("truncate table xunleihao")
             for (k, v) in self.html_parser.movies.items():
                 cursor.execute("insert into xunleihao values('%s','%s','%s')"  % (k, v.category, v.show_name.encode('UTF-8')));
                 conn.commit()
