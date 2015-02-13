@@ -143,12 +143,13 @@ class Xun_Lei_Hao_Spider:
     def page_dl_list(self, url, category):
     	self.url = url
     	self.dir_name = C2D[category]
+    	self.index = C2I[category]
         self.html_parser.category = category
 
         i = 1
         while (True):
-    	    remote_file_name = "list_5_" + str(i) + ".html"
-    	    local_file_name = "list_5_" + string.zfill(i, 3) + ".html"
+    	    remote_file_name = "list_" + str(self.index) + "_" + str(i) + ".html"
+    	    local_file_name = "list_" + str(self.index) + "_" + string.zfill(i, 3) + ".html"
             if os.path.isfile(self.dir_name + local_file_name):
     	        f = open(self.dir_name + local_file_name, 'r+')
     	        print "R[" + self.url + remote_file_name + "]"
