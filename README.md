@@ -12,6 +12,6 @@ http://tr23.net/2013/11/26/using-the-imdb-dataset-for-testing-mysql-performance/
 
 
 rm -rf xunleihao/*
+mkdir -p xunleihao
 cd xunleihao
-mkdir xunleihao
 mkdir DLDY  DLJ  DM  GTDY  GTJ  JDDY  OMDY  OMJ  RHDY  RHJ  ZYP  movies
