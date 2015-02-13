@@ -107,7 +107,7 @@ class Xun_Lei_Hao_Html_Parser(SGMLParser):
         if self.is_movie:
             self.is_movie = False
             self.movie.category = self.category
-            if self.movies[self.id]:
+            if self.movies.has_key(self.id):
                 pass
             else:
                 self.moves[self.id] = copy.copy(self.movie)
