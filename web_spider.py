@@ -355,7 +355,7 @@ try:
     for (k, v) in web_spider.html_parser.movies.items():
         #print "insert into xlh_fileid2show_name values('%s','%s')"  % (k, v.show_name.encode('UTF-8'));
         cursor.execute("insert into xlh_fileid2show_name values('%s','%s')"  % (k, v.show_name.encode('UTF-8')));
-    #conn.commit()
+        conn.commit()
 
 except MySQLdb.Error, e:
     print 'MySQL Error: %d %s' % (e.args[0], e.args[1])

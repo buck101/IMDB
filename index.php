@@ -8,7 +8,7 @@
     mysql_select_db("movies", $con);
     mysql_query("set names utf8");
     
-    $result = mysql_query("SELECT * FROM xlh_fileid2show_name");
+    $result = mysql_query("select * from xlh_fileid2show_name");
     
     while ($row = mysql_fetch_array($result))
     {
