@@ -31,9 +31,24 @@ C2D = {
         'DLDY':'xunleihao/DLDY/',
         'OMJ':'xunleihao/OMJ/',
         'RHJ':'xunleihao/RHJ/',
+        'GTJ':'xunleihao/GTJ/',
         'DLJ':'xunleihao/DLJ/',
         'ZYP':'xunleihao/ZYP/',
         'DM':'xunleihao/DM/',
+}
+
+C2I = {
+        'JDDY':5,
+        'OMDY':1,
+        'RHDY':2,
+        'GTDY':3,
+        'DLDY':4,
+        'OMJ':6,
+        'RHJ':7,
+        'GTJ':8,
+        'DLJ':9,
+        'ZYP':10,
+        'DM':11,
 }
 
 class movie:
