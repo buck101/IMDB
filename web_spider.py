@@ -110,7 +110,7 @@ class Xun_Lei_Hao_Html_Parser(SGMLParser):
             if self.movies.has_key(self.id):
                 pass
             else:
-                self.moves[self.id] = copy.copy(self.movie)
+                self.movies[self.id] = copy.copy(self.movie)
 
 
     # for dl_movie
