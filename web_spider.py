@@ -211,7 +211,7 @@ class Xun_Lei_Hao_Spider:
         except MySQLdb.Error, e:
             print 'MySQL Error: %d %s' % (e.args[0], e.args[1])
             conn.rollback()
-            sys.exit()
+            #sys.exit()
         else:
             cursor.close()
             conn.close()
