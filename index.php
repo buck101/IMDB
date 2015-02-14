@@ -8,7 +8,7 @@
     mysql_select_db("movies", $con);
     mysql_query("set names utf8");
     
-    $result = mysql_query("select * from xunleihao");
+    $result = mysql_query("select * from xunleihao where category='DM'");
     
     while ($row = mysql_fetch_array($result))
     {
