@@ -7,13 +7,13 @@
     }
     mysql_select_db("movies", $con);
     mysql_query("set names utf8");
-    
+
     $result = mysql_query("select * from xunleihao where category='DM'");
-    
+
     while ($row = mysql_fetch_array($result))
     {
-       echo "<a href='xunleihao/".$row['fileid']."'>";
-       echo $row['show_name'];
-       echo  "<br /></a>"; 
+        echo "<a href='xunleihao/".$row['fileid']."'>";
+        echo $row['show_name'];
+        echo  "<br /></a>"; 
     }
 ?>
