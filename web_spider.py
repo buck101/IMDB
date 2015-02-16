@@ -7,7 +7,7 @@ import re
 from sgmllib import SGMLParser
 import os
 import MySQLdb
-import imdb
+#import imdb
 import sys
 import time
 import copy
